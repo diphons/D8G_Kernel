@@ -443,11 +443,9 @@ int __cgroup_bpf_run_filter_sk(struct sock *sk,
 			       enum bpf_attach_type type)
 {
 	struct cgroup *cgrp = sock_cgroup_ptr(&sk->sk_cgrp_data);
-	struct sk_buff *skb;
 	int ret;
 
-	skb->sk = sk;
-	ret = BPF_PROG_RUN_ARRAY(cgrp->bpf.effective[type], skb, BPF_PROG_RUN);
+	ret = BPF_PROG_RUN_ARRAY(cgrp->bpf.effective[type], sk, BPF_PROG_RUN);
 	return ret == 1 ? 0 : -EPERM;
 }
 EXPORT_SYMBOL(__cgroup_bpf_run_filter_sk);
