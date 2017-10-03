@@ -897,6 +897,9 @@ static int bpf_obj_get(const union bpf_attr *attr)
 #define BPF_F_ATTACH_MASK \
 	(BPF_F_ALLOW_OVERRIDE | BPF_F_ALLOW_MULTI)
 
+#define BPF_F_ATTACH_MASK \
+	(BPF_F_ALLOW_OVERRIDE | BPF_F_ALLOW_MULTI)
+
 static int bpf_prog_attach(const union bpf_attr *attr)
 {
 	struct bpf_prog *prog;
@@ -961,6 +964,9 @@ static int bpf_prog_detach(const union bpf_attr *attr)
 	case BPF_CGROUP_INET_INGRESS:
 	case BPF_CGROUP_INET_EGRESS:
 		ptype = BPF_PROG_TYPE_CGROUP_SKB;
+		break;
+	case BPF_CGROUP_INET_SOCK_CREATE:
+		ptype = BPF_PROG_TYPE_CGROUP_SOCK;
 		break;
 
 	default:
