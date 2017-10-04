@@ -86,6 +86,7 @@ struct global_pstate_info {
 	int last_gpstate_idx;
 	spinlock_t gpstate_lock;
 	struct timer_list timer;
+	struct cpufreq_policy *policy;
 };
 
 static struct cpufreq_frequency_table powernv_freqs[POWERNV_MAX_PSTATES+1];
@@ -588,11 +589,11 @@ static inline void  queue_gpstate_timer(struct global_pstate_info *gpstates)
  * according quadratic equation. Queues a new timer if it is still not equal
  * to local pstate
  */
-void gpstate_timer_handler(unsigned long data)
+void gpstate_timer_handler(struct timer_list *t)
 {
-	struct cpufreq_policy *policy = (struct cpufreq_policy *)data;
-	struct global_pstate_info *gpstates = policy->driver_data;
-	int gpstate_idx;
+	struct global_pstate_info *gpstates = from_timer(gpstates, t, timer);
+	struct cpufreq_policy *policy = gpstates->policy;
+	int gpstate_idx, lpstate_idx;
 	unsigned int time_diff = jiffies_to_msecs(jiffies)
 					- gpstates->last_sampled_time;
 	struct powernv_smp_call_data freq_data;
@@ -758,9 +759,9 @@ static int powernv_cpufreq_cpu_init(struct cpufreq_policy *policy)
 	policy->driver_data = gpstates;
 
 	/* initialize timer */
-	init_timer_pinned_deferrable(&gpstates->timer);
-	gpstates->timer.data = (unsigned long)policy;
-	gpstates->timer.function = gpstate_timer_handler;
+	gpstates->policy = policy;
+	timer_setup(&gpstates->timer, gpstate_timer_handler,
+		    TIMER_PINNED | TIMER_DEFERRABLE);
 	gpstates->timer.expires = jiffies +
 				msecs_to_jiffies(GPSTATE_TIMER_INTERVAL);
 	spin_lock_init(&gpstates->gpstate_lock);
