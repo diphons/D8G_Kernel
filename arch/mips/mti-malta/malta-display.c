@@ -37,7 +37,7 @@ void mips_display_message(const char *str)
 }
 
 static void scroll_display_message(unsigned long data);
-static DEFINE_TIMER(mips_scroll_timer, scroll_display_message, HZ, 0);
+static DEFINE_TIMER(mips_scroll_timer, scroll_display_message);
 
 static void scroll_display_message(unsigned long data)
 {

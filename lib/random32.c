@@ -483,7 +483,7 @@ core_initcall(prandom_init_early);
 /* Stronger reseeding when available, and periodically thereafter. */
 static void prandom_reseed(unsigned long dontcare);
 
-static DEFINE_TIMER(seed_timer, prandom_reseed, 0, 0);
+static DEFINE_TIMER(seed_timer, prandom_reseed);
 
 static void prandom_reseed(unsigned long dontcare)
 {
