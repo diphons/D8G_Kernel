@@ -273,15 +273,14 @@ void topology_schedule_update(void)
 	schedule_work(&topology_work);
 }
 
-static void topology_timer_fn(unsigned long ignored)
+static void topology_timer_fn(struct timer_list *unused)
 {
 	if (ptf(PTF_CHECK))
 		topology_schedule_update();
 	set_topology_timer();
 }
 
-static struct timer_list topology_timer =
-	TIMER_DEFERRED_INITIALIZER(topology_timer_fn, 0, 0);
+static struct timer_list topology_timer;
 
 static atomic_t topology_poll = ATOMIC_INIT(0);
 
@@ -462,6 +461,7 @@ early_initcall(s390_topology_init);
 
 static int __init topology_init(void)
 {
+	timer_setup(&topology_timer, topology_timer_fn, TIMER_DEFERRABLE);
 	if (MACHINE_HAS_TOPOLOGY)
 		set_topology_timer();
 	else
