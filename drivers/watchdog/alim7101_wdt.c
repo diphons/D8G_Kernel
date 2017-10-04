@@ -87,7 +87,7 @@ MODULE_PARM_DESC(nowayout,
  *	Whack the dog
  */
 
-static void wdt_timer_ping(unsigned long data)
+static void wdt_timer_ping(unsigned long unused)
 {
 	/* If we got a heartbeat pulse within the WDT_US_INTERVAL
 	 * we agree to ping the WDT
