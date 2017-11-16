@@ -8,7 +8,6 @@
 #include <linux/dma-debug.h>
 #include <linux/dma-direction.h>
 #include <linux/scatterlist.h>
-#include <linux/kmemcheck.h>
 #include <linux/bug.h>
 
 /**
@@ -226,7 +225,6 @@ static inline dma_addr_t dma_map_single_attrs(struct device *dev, void *ptr,
 	const struct dma_map_ops *ops = get_dma_ops(dev);
 	dma_addr_t addr;
 
-	kmemcheck_mark_initialized(ptr, size);
 	BUG_ON(!valid_dma_direction(dir));
 	addr = ops->map_page(dev, virt_to_page(ptr),
 			     offset_in_page(ptr), size,
@@ -259,11 +257,8 @@ static inline int dma_map_sg_attrs(struct device *dev, struct scatterlist *sg,
 				   unsigned long attrs)
 {
 	const struct dma_map_ops *ops = get_dma_ops(dev);
-	int i, ents;
-	struct scatterlist *s;
+	int ents;
 
-	for_each_sg(sg, s, nents, i)
-		kmemcheck_mark_initialized(sg_virt(s), s->length);
 	BUG_ON(!valid_dma_direction(dir));
 	ents = ops->map_sg(dev, sg, nents, dir, attrs);
 	BUG_ON(ents < 0);
@@ -291,7 +286,6 @@ static inline dma_addr_t dma_map_page(struct device *dev, struct page *page,
 	const struct dma_map_ops *ops = get_dma_ops(dev);
 	dma_addr_t addr;
 
-	kmemcheck_mark_initialized(page_address(page) + offset, size);
 	BUG_ON(!valid_dma_direction(dir));
 	addr = ops->map_page(dev, page, offset, size, dir, 0);
 	debug_dma_map_page(dev, page, offset, size, dir, addr, false);

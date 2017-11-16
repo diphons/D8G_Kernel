@@ -23,7 +23,6 @@
  */
 
 #include <linux/dma-debug.h>
-#include <linux/kmemcheck.h>
 #include <linux/dma-mapping.h>
 
 #define DMA_ERROR_CODE		(~(dma_addr_t)0x0)

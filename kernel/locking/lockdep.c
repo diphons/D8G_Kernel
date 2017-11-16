@@ -44,7 +44,6 @@
 #include <linux/stringify.h>
 #include <linux/bitops.h>
 #include <linux/gfp.h>
-#include <linux/kmemcheck.h>
 #include <linux/random.h>
 #include <linux/jhash.h>
 
@@ -3102,8 +3101,6 @@ void lockdep_init_map(struct lockdep_map *lock, const char *name,
 		      struct lock_class_key *key, int subclass)
 {
 	int i;
-
-	kmemcheck_mark_initialized(lock, sizeof(*lock));
 
 	for (i = 0; i < NR_LOCKDEP_CACHING_CLASSES; i++)
 		lock->class_cache[i] = NULL;
