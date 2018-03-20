@@ -119,6 +119,12 @@ enum {
 #define MANUFACTURE_ID_MASK	UFS_MASK(0xFFFF, 0)
 #define PRODUCT_ID_MASK		UFS_MASK(0xFFFF, 16)
 
+/* AHIT - Auto-Hibernate Idle Timer */
+#define UFSHCI_AHIBERN8_TIMER_MASK		GENMASK(9, 0)
+#define UFSHCI_AHIBERN8_SCALE_MASK		GENMASK(12, 10)
+#define UFSHCI_AHIBERN8_SCALE_FACTOR		10
+#define UFSHCI_AHIBERN8_MAX			(1023 * 100000)
+
 /*
  * AHIT - Auto-Hibernate Idle Timer  18h
  */
