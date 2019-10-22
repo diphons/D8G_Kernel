@@ -33,6 +33,7 @@ extern unsigned int sysctl_sched_use_walt_task_util;
 extern unsigned int sysctl_sched_boost;
 extern unsigned int sysctl_sched_group_upmigrate_pct;
 extern unsigned int sysctl_sched_group_downmigrate_pct;
+extern unsigned int sysctl_sched_conservative_pl;
 extern unsigned int sysctl_sched_walt_rotate_big_tasks;
 extern unsigned int sysctl_sched_min_task_util_for_boost_colocation;
 extern unsigned int sysctl_sched_little_cluster_coloc_fmin_khz;
