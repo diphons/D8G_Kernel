@@ -52,6 +52,8 @@ extern char __dtb_end[];
 
 extern void early_init_dt_setup_pureason_arch(unsigned long pu_reason);
 extern int of_fdt_get_ddrtype(void);
+extern int of_fdt_get_ddrrank(int channel);
+extern int of_fdt_get_ddrhbb(int channel, int rank);
 #endif /* CONFIG_OF_FLATTREE */
 
 /* For scanning the flat device-tree at boot time */
