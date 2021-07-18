@@ -762,6 +762,7 @@ static int geni_i2c_xfer(struct i2c_adapter *adap,
 					      msgs[i].len);
 		}
 		ret = gi2c->err;
+		gi2c->err = 0;
 		if (gi2c->err) {
 			dev_err(gi2c->dev, "i2c error :%d\n", gi2c->err);
 			break;
