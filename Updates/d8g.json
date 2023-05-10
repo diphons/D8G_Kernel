@@ -1,0 +1,13 @@
+ {
+  "kernel": {
+    "name": "D8G Beryllium",
+    "version": "v1.3",
+    "link": "",
+    "changelog_url": "",
+    "date": "2020-03-13",
+    "sha1": ""
+  },
+  "support": {
+    "link": ""
+  }
+}

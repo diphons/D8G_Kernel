@@ -1,0 +1,92 @@
+menu "Android"
+
+config ANDROID
+	bool "Android Drivers"
+	---help---
+	  Enable support for various drivers needed on the Android platform
+
+if ANDROID
+
+config ANDROID_BINDER_IPC
+	bool "Android Binder IPC Driver"
+	depends on MMU
+	default n
+	---help---
+	  Binder is used in Android for both communication between processes,
+	  and remote method invocation.
+
+	  This means one Android process can call a method/routine in another
+	  Android process, using Binder to identify, invoke and pass arguments
+	  between said processes.
+
+config ANDROID_BINDER_DEVICES
+	string "Android Binder devices"
+	depends on ANDROID_BINDER_IPC
+	default "binder,hwbinder,vndbinder"
+	---help---
+	  Default value for the binder.devices parameter.
+
+	  The binder.devices parameter is a comma-separated list of strings
+	  that specifies the names of the binder device nodes that will be
+	  created. Each binder device has its own context manager, and is
+	  therefore logically separated from the other devices.
+
+config ANDROID_BINDER_IPC_32BIT
+	bool "Android Binder IPC 32BIT Driver"
+	depends on !64BIT && ANDROID_BINDER_IPC
+	default n
+	---help---
+	  The Binder API has been changed to support both 32 and 64bit
+	  applications in a mixed environment.
+
+	  Enable this to support an old 32-bit Android user-space (v4.4 and
+	  earlier).
+
+	  Note that enabling this will break newer Android user-space.
+
+config ANDROID_BINDER_IPC_SELFTEST
+	bool "Android Binder IPC Driver Selftest"
+	depends on ANDROID_BINDER_IPC
+	---help---
+	  This feature allows binder selftest to run.
+
+	  Binder selftest checks the allocation and free of binder buffers
+	  exhaustively with combinations of various buffer sizes and
+	  alignments.
+
+config ANDROID_SIMPLE_LMK
+	bool "Simple Android Low Memory Killer"
+	depends on !ANDROID_LOW_MEMORY_KILLER && !MEMCG
+	---help---
+	  This is a complete low memory killer solution for Android that is
+	  small and simple. Processes are killed according to the priorities
+	  that Android gives them, so that the least important processes are
+	  always killed first. Processes are killed until memory deficits are
+	  satisfied, as observed from kswapd struggling to free up pages. Simple
+	  LMK stops killing processes when kswapd finally goes back to sleep.
+
+if ANDROID_SIMPLE_LMK
+
+config ANDROID_SIMPLE_LMK_MINFREE
+	int "Minimum MiB of memory to free per reclaim"
+	range 8 512
+	default 128
+	help
+	  Simple LMK will try to free at least this much memory per reclaim.
+
+config ANDROID_SIMPLE_LMK_TIMEOUT_MSEC
+	int "Reclaim timeout in milliseconds"
+	range 50 1000
+	default 200
+	help
+	  Simple LMK tries to wait until all of the victims it kills have their
+	  memory freed; however, sometimes victims can take a while to die,
+	  which can block Simple LMK from killing more processes in time when
+	  needed. After the specified timeout elapses, Simple LMK will stop
+	  waiting and make itself available to kill more processes.
+
+endif
+
+endif # if ANDROID
+
+endmenu

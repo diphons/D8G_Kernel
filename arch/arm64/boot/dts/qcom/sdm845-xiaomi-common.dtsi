@@ -1,0 +1,177 @@
+/* Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2018 XiaoMi, Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+#include "sdm845-xiaomi-sde-display.dtsi"
+
+/{
+	reserved-memory {
+		ramoops: ramoops@b0000000 {
+			compatible = "ramoops";
+			reg = <0 0xb0000000 0 0x00400000>;
+			record-size = <0x40000>; /*256x1024*/
+			console-size = <0x40000>;
+			ftrace-size = <0x40000>;
+			pmsg-size = <0x200000>;
+			ecc-size = <0x0>;
+		};
+	};
+};
+
+&firmware {
+	android {
+		/delete-node/ vbmeta;
+
+		fstab {
+			system {
+				compatible = "android,system";
+				dev = "/dev/block/platform/soc/1d84000.ufshc/by-name/system";
+				type = "ext4";
+				mnt_flags = "ro,barrier=1,discard";
+				fsmgr_flags = "wait";
+				status = "ok";
+			};
+			system_ext {
+				compatible = "android,system_ext";
+				dev = "/dev/block/platform/soc/1d84000.ufshc/by-name/cust";
+				type = "ext4";
+				mnt_flags = "ro,barrier=1,discard";
+				fsmgr_flags = "wait";
+				status = "ok";
+			};
+			vendor {
+				fsmgr_flags = "wait";
+			};
+		};
+	};
+};
+
+&red_led {
+	linux,name = "white";
+	qcom,start-idx = <1>;
+	qcom,idx-len = <11>;
+	qcom,duty-pcts = [00 05 0a 0f 14 1d 28 32 3c 4b 64];
+	qcom,lut-flags = <0x1f>;
+	qcom,pause-lo = <2000>;
+	qcom,pause-hi = <1000>;
+	qcom,ramp-step-ms = <100>;
+	qcom,use-blink;
+	status = "okay";
+};
+
+&green_led {
+	status = "disabled";
+};
+
+&blue_led {
+	status = "disabled";
+};
+
+// Simple MSM Thermal Solution for Xiaomi SDM845
+&soc {
+	qcom,msm-thermal-simple {
+		compatible = "qcom,msm-thermal-simple";
+		qcom,poll-ms = <3000>;
+		qcom,start-delay = <5>;
+
+		zone@0 {
+			reg = <0>;
+			qcom,silver-khz = <1766400>;
+			qcom,gold-khz = <2956800>;
+			qcom,trip-deg = <60000>;
+		};
+
+		zone@1 {
+			reg = <1>;
+			qcom,silver-khz = <1766400>;
+			qcom,gold-khz = <2803200>;
+			qcom,trip-deg = <63000>;
+		};
+
+		zone@2 {
+			reg = <2>;
+			qcom,silver-khz = <1766400>;
+			qcom,gold-khz = <2649600>;
+			qcom,trip-deg = <65000>;
+		};
+
+		zone@3 {
+			reg = <3>;
+			qcom,silver-khz = <1766400>;
+			qcom,gold-khz = <2553600>;
+			qcom,trip-deg = <67000>;
+		};
+
+		zone@4 {
+			reg = <4>;
+			qcom,silver-khz = <1766400>;
+			qcom,gold-khz = <2476800>;
+			qcom,trip-deg = <69000>;
+		};
+
+		zone@5 {
+			reg = <5>;
+			qcom,silver-khz = <1766400>;
+			qcom,gold-khz = <2323200>;
+			qcom,trip-deg = <72000>;
+		};
+
+		zone@6 {
+			reg = <6>;
+			qcom,silver-khz = <1766400>;
+			qcom,gold-khz = <2246400>;
+			qcom,trip-deg = <74000>;
+		};
+
+		zone@7 {
+			reg = <7>;
+			qcom,silver-khz = <1766400>;
+			qcom,gold-khz = <2092800>;
+			qcom,trip-deg = <76000>;
+		};
+
+		zone@8 {
+			reg = <8>;
+			qcom,silver-khz = <1766400>;
+			qcom,gold-khz = <1996800>;
+			qcom,trip-deg = <78000>;
+		};
+
+		zone@9 {
+			reg = <9>;
+			qcom,silver-khz = <1689600>;
+			qcom,gold-khz = <1843200>;
+			qcom,trip-deg = <80000>;
+		};
+
+		zone@10 {
+			reg = <10>;
+			qcom,silver-khz = <1689600>;
+			qcom,gold-khz = <1843200>;
+			qcom,trip-deg = <82000>;
+		};
+
+		zone@11 {
+			reg = <11>;
+			qcom,silver-khz = <1689600>;
+			qcom,gold-khz = <1766400>;
+			qcom,trip-deg = <84000>;
+		};
+
+		zone@12 {
+			reg = <12>;
+			qcom,silver-khz = <1689600>;
+			qcom,gold-khz = <1766400>;
+			qcom,trip-deg = <86000>;
+		};
+	};
+};
