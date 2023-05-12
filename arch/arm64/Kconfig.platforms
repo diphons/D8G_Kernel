@@ -353,4 +353,9 @@ config ARCH_ZYNQMP
 	help
 	  This enables support for Xilinx ZynqMP Family
 
+config OXYGEN_OS
+	bool "oxygen platform"
+	help
+	  This enables support for OxygenOS port rom.
+
 endmenu
