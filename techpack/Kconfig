@@ -1,1 +1,2 @@
 source techpack/audio/Kconfig
+source techpack/wlan/Kconfig
