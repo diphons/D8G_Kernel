@@ -538,6 +538,7 @@ static inline void io_schedule(void)
 }
 
 void __noreturn do_task_dead(void);
+void __noreturn make_task_dead(int signr);
 
 struct nsproxy;
 struct user_namespace;

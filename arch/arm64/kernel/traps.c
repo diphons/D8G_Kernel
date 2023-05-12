@@ -340,7 +340,7 @@ static void oops_end(unsigned long flags, struct pt_regs *regs, int notify)
 	if (panic_on_oops)
 		panic("Fatal exception");
 	if (notify != NOTIFY_STOP)
-		do_exit(SIGSEGV);
+		make_task_dead(SIGSEGV);
 }
 
 /*
