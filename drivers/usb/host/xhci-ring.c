@@ -433,6 +433,26 @@ static void ring_doorbell_for_active_rings(struct xhci_hcd *xhci,
 	}
 }
 
+static struct xhci_virt_ep *xhci_get_virt_ep(struct xhci_hcd *xhci,
+					     unsigned int slot_id,
+					     unsigned int ep_index)
+{
+	if (slot_id == 0 || slot_id >= MAX_HC_SLOTS) {
+		xhci_warn(xhci, "Invalid slot_id %u\n", slot_id);
+		return NULL;
+	}
+	if (ep_index >= EP_CTX_PER_DEV) {
+		xhci_warn(xhci, "Invalid endpoint index %u\n", ep_index);
+		return NULL;
+	}
+	if (!xhci->devs[slot_id]) {
+		xhci_warn(xhci, "No xhci virt device for slot_id %u\n", slot_id);
+		return NULL;
+	}
+
+	return &xhci->devs[slot_id]->eps[ep_index];
+}
+
 /* Get the right ring for the given slot_id, ep_index and stream_id.
  * If the endpoint supports streams, boundary check the URB's stream ID.
  * If the endpoint doesn't support streams, return the singular endpoint ring.
@@ -443,7 +463,10 @@ struct xhci_ring *xhci_triad_to_transfer_ring(struct xhci_hcd *xhci,
 {
 	struct xhci_virt_ep *ep;
 
-	ep = &xhci->devs[slot_id]->eps[ep_index];
+	ep = xhci_get_virt_ep(xhci, slot_id, ep_index);
+	if (!ep)
+		return NULL;
+
 	/* Common case: no streams */
 	if (!(ep->ep_state & EP_HAS_STREAMS))
 		return ep->ring;
@@ -743,7 +766,9 @@ static void xhci_handle_cmd_stop_ep(struct xhci_hcd *xhci, int slot_id,
 
 	memset(&deq_state, 0, sizeof(deq_state));
 	ep_index = TRB_TO_EP_INDEX(le32_to_cpu(trb->generic.field[3]));
-	ep = &xhci->devs[slot_id]->eps[ep_index];
+	ep = xhci_get_virt_ep(xhci, slot_id, ep_index);
+	if (!ep)
+		return;
 
 	if (list_empty(&ep->cancelled_td_list)) {
 		xhci_stop_watchdog_timer_in_irq(xhci, ep);
@@ -1052,9 +1077,11 @@ static void xhci_handle_cmd_set_deq(struct xhci_hcd *xhci, int slot_id,
 
 	ep_index = TRB_TO_EP_INDEX(le32_to_cpu(trb->generic.field[3]));
 	stream_id = TRB_TO_STREAM_ID(le32_to_cpu(trb->generic.field[2]));
-	dev = xhci->devs[slot_id];
-	ep = &dev->eps[ep_index];
+	ep = xhci_get_virt_ep(xhci, slot_id, ep_index);
+	if (!ep)
+		return;
 
+	dev = xhci->devs[slot_id];
 	ep_ring = xhci_stream_id_to_ring(dev, ep_index, stream_id);
 	if (!ep_ring) {
 		xhci_warn(xhci, "WARN Set TR deq ptr command for freed stream ID %u\n",
@@ -1126,9 +1153,9 @@ static void xhci_handle_cmd_set_deq(struct xhci_hcd *xhci, int slot_id,
 	}
 
 cleanup:
-	dev->eps[ep_index].ep_state &= ~SET_DEQ_PENDING;
-	dev->eps[ep_index].queued_deq_seg = NULL;
-	dev->eps[ep_index].queued_deq_ptr = NULL;
+	ep->ep_state &= ~SET_DEQ_PENDING;
+	ep->queued_deq_seg = NULL;
+	ep->queued_deq_ptr = NULL;
 	/* Restart any rings with pending URBs */
 	ring_doorbell_for_active_rings(xhci, slot_id, ep_index);
 }
@@ -1136,9 +1163,14 @@ cleanup:
 static void xhci_handle_cmd_reset_ep(struct xhci_hcd *xhci, int slot_id,
 		union xhci_trb *trb, u32 cmd_comp_code)
 {
+	struct xhci_virt_ep *ep;
 	unsigned int ep_index;
 
 	ep_index = TRB_TO_EP_INDEX(le32_to_cpu(trb->generic.field[3]));
+	ep = xhci_get_virt_ep(xhci, slot_id, ep_index);
+	if (!ep)
+		return;
+
 	/* This command will only fail if the endpoint wasn't halted,
 	 * but we don't care.
 	 */
@@ -1164,7 +1196,7 @@ static void xhci_handle_cmd_reset_ep(struct xhci_hcd *xhci, int slot_id,
 		xhci_ring_cmd_db(xhci);
 	} else {
 		/* Clear our internal halted state */
-		xhci->devs[slot_id]->eps[ep_index].ep_state &= ~EP_HALTED;
+		ep->ep_state &= ~EP_HALTED;
 	}
 }
 
@@ -2352,8 +2384,8 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 	bool handling_skipped_tds = false;
 
 	slot_id = TRB_TO_SLOT_ID(le32_to_cpu(event->flags));
-	xdev = xhci->devs[slot_id];
-	if (!xdev) {
+	ep = xhci_get_virt_ep(xhci, slot_id, ep_index);
+	if (!ep) {
 		xhci_err(xhci, "ERROR Transfer event pointed to bad slot\n");
 		xhci_err(xhci, "@%016llx %08x %08x %08x %08x\n",
 			 (unsigned long long) xhci_trb_virt_to_dma(
@@ -2370,7 +2402,7 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 
 	/* Endpoint ID is 1 based, our index is zero based */
 	ep_index = TRB_TO_EP_ID(le32_to_cpu(event->flags)) - 1;
-	ep = &xdev->eps[ep_index];
+	xdev = xhci->devs[slot_id];
 	ep_ring = xhci_dma_to_transfer_ring(ep, le64_to_cpu(event->buffer));
 	ep_ctx = xhci_get_ep_ctx(xhci, xdev->out_ctx, ep_index);
 	if (!ep_ring ||
