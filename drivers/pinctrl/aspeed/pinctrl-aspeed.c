@@ -225,7 +225,7 @@ static bool aspeed_disable_sig(const struct aspeed_sig_expr **exprs,
 	bool disabled = true;
 
 	if (!exprs)
-		return true;
+		return -EINVAL;
 
 	while (*exprs) {
 		bool ret;
