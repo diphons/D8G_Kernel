@@ -171,8 +171,11 @@ static inline __must_check long __copy_to_user(void __user *to,
 
 static inline int __put_user_fn(size_t size, void __user *ptr, void *x)
 {
-	size = __copy_to_user(ptr, x, size);
-	return size ? -EFAULT : size;
+#ifdef CONFIG_ARCH_HAS_RAW_COPY_USER
+	return unlikely(raw_copy_to_user(ptr, x, size)) ? -EFAULT : 0;
+#else
+	return unlikely(__copy_to_user(ptr, x, size)) ? -EFAULT : 0;
+#endif
 }
 
 #define __put_user_fn(sz, u, k)	__put_user_fn(sz, u, k)
@@ -233,12 +236,11 @@ extern int __put_user_bad(void) __attribute__((noreturn));
 #ifndef __get_user_fn
 static inline int __get_user_fn(size_t size, const void __user *ptr, void *x)
 {
-	size_t n = __copy_from_user(x, ptr, size);
-	if (unlikely(n)) {
-		memset(x + (size - n), 0, n);
-		return -EFAULT;
-	}
-	return 0;
+#ifdef CONFIG_ARCH_HAS_RAW_COPY_USER
+	return unlikely(raw_copy_from_user(x, ptr, size)) ? -EFAULT : 0;
+#else
+	return unlikely(__copy_from_user(x, ptr, size)) ? -EFAULT : 0;
+#endif
 }
 
 #define __get_user_fn(sz, u, k)	__get_user_fn(sz, u, k)
@@ -246,6 +248,8 @@ static inline int __get_user_fn(size_t size, const void __user *ptr, void *x)
 #endif
 
 extern int __get_user_bad(void) __attribute__((noreturn));
+
+#ifndef CONFIG_ARCH_HAS_RAW_COPY_USER
 
 #ifndef __copy_from_user_inatomic
 #define __copy_from_user_inatomic __copy_from_user
@@ -276,6 +280,7 @@ static inline long copy_to_user(void __user *to,
 	else
 		return n;
 }
+#endif
 
 /*
  * Copy a null terminated string from userspace.
