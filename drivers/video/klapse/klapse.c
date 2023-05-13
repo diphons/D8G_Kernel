@@ -48,8 +48,8 @@ static unsigned int last_bl = MAX_BRIGHTNESS;
 static unsigned long local_time;
 static struct rtc_time tm;
 static struct timeval time;
-static DEFINE_TIMER(pulse_timer, pulse, 0, 0);
-static DEFINE_TIMER(flow_timer, set_rgb_flow, 0, 0);
+static DEFINE_TIMER(pulse_timer, pulse);
+static DEFINE_TIMER(flow_timer, set_rgb_flow);
 
 static void restart_timer(void)
 {

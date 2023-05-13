@@ -280,7 +280,7 @@ void qdf_mc_timer_manager_exit(void)
 qdf_export_symbol(qdf_mc_timer_manager_exit);
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(4, 15, 0)
 static void __os_mc_timer_shim(struct timer_list *os_timer)
 {
 	qdf_mc_timer_platform_t *platform_info_ptr =
