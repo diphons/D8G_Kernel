@@ -1986,6 +1986,7 @@ static void process_deferred_bios(struct cache *cache)
 			process_discard_bio(cache, &structs, bio);
 		else
 			process_bio(cache, &structs, bio);
+		cond_resched();
 	}
 
 	if (prealloc_used)
@@ -2223,6 +2224,7 @@ static void requeue_deferred_bios(struct cache *cache)
 	while ((bio = bio_list_pop(&bios))) {
 		bio->bi_error = DM_ENDIO_REQUEUE;
 		bio_endio(bio);
+		cond_resched();
 	}
 }
 
@@ -3743,6 +3745,8 @@ static int process_invalidate_cblocks_message(struct cache *cache, unsigned coun
 		r = request_invalidation(cache, &range);
 		if (r)
 			break;
+
+		cond_resched();
 	}
 
 	return r;

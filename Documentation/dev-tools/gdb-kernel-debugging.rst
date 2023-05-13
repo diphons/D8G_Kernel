@@ -37,6 +37,10 @@ Setup
   you do not depend on modules. See QEMU documentation for more details on
   this mode.
 
+- Build the gdb scripts (required on kernels v5.1 and above)::
+
+    make scripts_gdb
+
 - Enable the gdb stub of QEMU/KVM, either
 
     - at VM startup time by appending "-s" to the QEMU command line

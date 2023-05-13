@@ -66,12 +66,12 @@ extern int apply_microcode_amd(int cpu);
 extern void __init load_ucode_amd_bsp(unsigned int family);
 extern void load_ucode_amd_ap(void);
 extern int __init save_microcode_in_initrd_amd(void);
-void reload_ucode_amd(void);
+void reload_ucode_amd(unsigned int cpu);
 #else
 static inline void __init load_ucode_amd_bsp(unsigned int family) {}
 static inline void load_ucode_amd_ap(void) {}
 static inline int __init save_microcode_in_initrd_amd(void) { return -EINVAL; }
-void reload_ucode_amd(void) {}
+static inline void reload_ucode_amd(unsigned int cpu) {}
 #endif
 
 extern bool check_current_patch_level(u32 *rev, bool early);

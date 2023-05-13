@@ -1125,6 +1125,7 @@ SYSCALL_DEFINE4(clock_nanosleep, const clockid_t, which_clock, int, flags,
 	if (!timespec_valid(&t))
 		return -EINVAL;
 
+	current->restart_block.fn = do_no_restart_syscall;
 	return kc->nsleep(which_clock, flags, &t, rmtp);
 }
 
