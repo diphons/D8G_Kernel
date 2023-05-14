@@ -381,6 +381,7 @@ static int pn533_acr122_poweron_rdr(struct pn533_usb_phy *phy)
 
 	dev_dbg(&phy->udev->dev, "%s\n", __func__);
 
+	arg.phy = phy;
 	init_completion(&arg.done);
 	cntx = phy->in_urb->context;  /* backup context */
 
