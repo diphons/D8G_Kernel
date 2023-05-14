@@ -1604,7 +1604,9 @@ static struct mapped_device *alloc_dev(int minor)
 	md->flush_bio.bi_bdev = md->bdev;
 	bio_set_op_attrs(&md->flush_bio, REQ_OP_WRITE, WRITE_FLUSH);
 
-	dm_stats_init(&md->stats);
+	r = dm_stats_init(&md->stats);
+	if (r < 0)
+		goto bad;
 
 	/* Populate the mapping, nobody knows we exist yet */
 	spin_lock(&_minor_lock);
