@@ -1616,6 +1616,9 @@ ext4_xattr_delete_inode(handle_t *handle, struct inode *inode)
 	ext4_xattr_release_block(handle, inode, bh);
 	EXT4_I(inode)->i_file_acl = 0;
 
+	if (ext4_has_inline_data(inode))
+		ext4_find_inline_data_nolock(inode);
+
 cleanup:
 	brelse(bh);
 }
