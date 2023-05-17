@@ -1048,7 +1048,7 @@ static struct cftype files[] = {
 #ifdef CONFIG_STUNE_ASSIST
 		.write_s64 = boost_write_wrapper,
 #else
-		.write_u64 = boost_write,
+		.write_s64 = boost_write,
 #endif
 	},
 	{
