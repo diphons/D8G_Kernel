@@ -4813,7 +4813,7 @@ static void ufshcd_auto_hibern8_enable(struct ufs_hba *hba)
 		return;
 
 	spin_lock_irqsave(hba->host->host_lock, flags);
-	ufshcd_writel(hba, hba->ahit, REG_AUTO_HIBERNATE_IDLE_TIMER);
+	ufshcd_writel(hba, hba->ahit, REG_AUTO_HIBERN8_IDLE_TIMER);
 	spin_unlock_irqrestore(hba->host->host_lock, flags);
 }
 
