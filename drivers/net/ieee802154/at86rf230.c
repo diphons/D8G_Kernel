@@ -519,7 +519,7 @@ at86rf230_async_state_delay(void *context)
 	case STATE_TRX_OFF:
 		switch (ctx->to_state) {
 		case STATE_RX_AACK_ON:
-			tim = ktime_set(0, c->t_off_to_aack * NSEC_PER_USEC);
+			tim = c->t_off_to_aack * NSEC_PER_USEC;
 			/* state change from TRX_OFF to RX_AACK_ON to do a
 			 * calibration, we need to reset the timeout for the
 			 * next one.
@@ -528,7 +528,7 @@ at86rf230_async_state_delay(void *context)
 			goto change;
 		case STATE_TX_ARET_ON:
 		case STATE_TX_ON:
-			tim = ktime_set(0, c->t_off_to_tx_on * NSEC_PER_USEC);
+			tim = c->t_off_to_tx_on * NSEC_PER_USEC;
 			/* state change from TRX_OFF to TX_ON or ARET_ON to do
 			 * a calibration, we need to reset the timeout for the
 			 * next one.
@@ -548,8 +548,7 @@ at86rf230_async_state_delay(void *context)
 			 * to TX_ON or TRX_OFF.
 			 */
 			if (!force) {
-				tim = ktime_set(0, (c->t_frame + c->t_p_ack) *
-						   NSEC_PER_USEC);
+				tim = (c->t_frame + c->t_p_ack) * NSEC_PER_USEC;
 				goto change;
 			}
 			break;
@@ -561,7 +560,7 @@ at86rf230_async_state_delay(void *context)
 	case STATE_P_ON:
 		switch (ctx->to_state) {
 		case STATE_TRX_OFF:
-			tim = ktime_set(0, c->t_reset_to_off * NSEC_PER_USEC);
+			tim = c->t_reset_to_off * NSEC_PER_USEC;
 			goto change;
 		default:
 			break;
