@@ -247,7 +247,6 @@ more:
 out:
 	report_message_lost(s);
 	raw_spin_unlock_irqrestore(&nmi_read_lock, flags);
->>>>>>> ddb9baa822265 (printk: report lost messages in printk safe/nmi contexts)
 }
 
 /**
