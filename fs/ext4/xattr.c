@@ -1308,6 +1308,7 @@ static int ext4_xattr_move_to_block(handle_t *handle, struct inode *inode,
 		.name_index = entry->e_name_index,
 	};
 	struct ext4_xattr_ibody_header *header = IHDR(inode, raw_inode);
+	int needs_kvfree = 0;
 	int error;
 
 	value_offs = le16_to_cpu(entry->e_value_offs);
@@ -1331,6 +1332,8 @@ static int ext4_xattr_move_to_block(handle_t *handle, struct inode *inode,
 		error = -ENOMEM;
 		goto out;
 	}
+
+	needs_kvfree = 1;
 	/* Save the entry name and the entry value */
 	memcpy(buffer, (void *)IFIRST(header) + value_offs, value_size);
 	memcpy(b_entry_name, entry->e_name, entry->e_name_len);
@@ -1366,7 +1369,8 @@ static int ext4_xattr_move_to_block(handle_t *handle, struct inode *inode,
 
 out:
 	kfree(b_entry_name);
-	kfree(buffer);
+	if (needs_kvfree && buffer)
+		kvfree(buffer);
 	if (is)
 		brelse(is->iloc.bh);
 	if (bs)

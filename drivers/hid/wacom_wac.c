@@ -1445,6 +1445,7 @@ static void wacom_map_usage(struct input_dev *input, struct hid_usage *usage,
 {
 	int fmin = field->logical_minimum;
 	int fmax = field->logical_maximum;
+	int resolution = hidinput_calc_abs_res(field, resolution_code);
 
 	usage->type = type;
 	usage->code = code;
@@ -1454,8 +1455,15 @@ static void wacom_map_usage(struct input_dev *input, struct hid_usage *usage,
 	switch (type) {
 	case EV_ABS:
 		input_set_abs_params(input, code, fmin, fmax, fuzz, 0);
-		input_abs_set_res(input, code,
-				  hidinput_calc_abs_res(field, code));
+
+		/* older tablet may miss physical usage */
+		if ((code == ABS_X || code == ABS_Y) && !resolution) {
+			resolution = WACOM_INTUOS_RES;
+			hid_warn(input,
+				 "Wacom usage (%d) missing resolution \n",
+				 code);
+		}
+		input_abs_set_res(input, code, resolution);
 		break;
 	case EV_KEY:
 		input_set_capability(input, EV_KEY, code);

@@ -184,7 +184,7 @@ static void *nft_hash_deactivate(const struct net *net,
 	rcu_read_lock();
 	he = rhashtable_lookup_fast(&priv->ht, &arg, nft_hash_params);
 	if (he != NULL) {
-		if (!nft_set_elem_mark_busy(&he->ext) ||
+		if (!nft_set_elem_mark_busy(&he->ext) &&
 		    !nft_is_active(net, &he->ext))
 			nft_set_elem_change_active(net, set, &he->ext);
 		else
