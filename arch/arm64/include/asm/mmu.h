@@ -23,9 +23,12 @@
 
 #include <linux/percpu.h>
 
+#define MMCF_AARCH32	0x1	/* mm context flag for AArch32 executables */
+
 typedef struct {
 	atomic64_t	id;
 	void		*vdso;
+	unsigned long	flags;
 } mm_context_t;
 
 /*
