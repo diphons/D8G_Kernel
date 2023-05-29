@@ -15,6 +15,8 @@
 
 #include "kgsl_hfi.h"
 
+#define GMU_FREQUENCY   500000000
+#define GMU_FREQUENCY_LOW   200000000
 #define FW_VER_MAJOR(ver)		(((ver)>>28) & 0xFF)
 #define FW_VER_MINOR(ver)		(((ver)>>16) & 0xFFF)
 #define FW_VERSION(major, minor)	\
