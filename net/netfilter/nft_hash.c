@@ -18,8 +18,8 @@
 #include <linux/jhash.h>
 
 struct nft_hash {
-	enum nft_registers      sreg:8;
-	enum nft_registers      dreg:8;
+	u8			sreg;
+	u8			dreg;
 	u8			len;
 	u32			modulus;
 	u32			seed;
@@ -65,9 +65,6 @@ static int nft_hash_init(const struct nft_ctx *ctx,
 	if (tb[NFTA_HASH_OFFSET])
 		priv->offset = ntohl(nla_get_be32(tb[NFTA_HASH_OFFSET]));
 
-	priv->sreg = nft_parse_register(tb[NFTA_HASH_SREG]);
-	priv->dreg = nft_parse_register(tb[NFTA_HASH_DREG]);
-
 	err = nft_parse_u32_check(tb[NFTA_HASH_LEN], U8_MAX, &len);
 	if (err < 0)
 		return err;
@@ -75,6 +72,10 @@ static int nft_hash_init(const struct nft_ctx *ctx,
 		return -ERANGE;
 
 	priv->len = len;
+
+	err = nft_parse_register_load(tb[NFTA_HASH_SREG], &priv->sreg, len);
+	if (err < 0)
+		return err;
 
 	priv->modulus = ntohl(nla_get_be32(tb[NFTA_HASH_MODULUS]));
 	if (priv->modulus <= 1)
@@ -85,9 +86,8 @@ static int nft_hash_init(const struct nft_ctx *ctx,
 
 	priv->seed = ntohl(nla_get_be32(tb[NFTA_HASH_SEED]));
 
-	return nft_validate_register_load(priv->sreg, len) &&
-	       nft_validate_register_store(ctx, priv->dreg, NULL,
-					   NFT_DATA_VALUE, sizeof(u32));
+	return nft_parse_register_store(ctx, tb[NFTA_HASH_DREG], &priv->dreg,
+					NULL, NFT_DATA_VALUE, sizeof(u32));
 }
 
 static int nft_hash_dump(struct sk_buff *skb,
