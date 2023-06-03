@@ -14,8 +14,7 @@ obj-y += kernel_compat.o
 obj-y += selinux/
 # .git is a text file while the module is imported by 'git submodule add'.
 ifeq ($(shell test -e $(srctree)/$(src)/../.git; echo $$?),0)
-# We must use the absolute path to git, otherwise the build will fail if git is not in the PATH
-KSU_GIT_VERSION := $(shell cd $(srctree)/$(src);/usr/bin/git rev-list --count HEAD)
+KSU_GIT_VERSION := $(shell cd $(srctree)/$(src); /usr/bin/env PATH="$$PATH":/usr/bin:/usr/local/bin git rev-list --count HEAD)
 ccflags-y += -DKSU_GIT_VERSION=$(KSU_GIT_VERSION)
 endif
 
@@ -30,4 +29,4 @@ endif
 ccflags-y += -DEXPECTED_SIZE=$(EXPECTED_SIZE)
 ccflags-y += -DEXPECTED_HASH=$(EXPECTED_HASH)
 ccflags-y += -Wno-implicit-function-declaration -Wno-strict-prototypes -Wno-int-conversion -Wno-gcc-compat
-ccflags-y += -Wno-macro-redefined -Wno-declaration-after-statement
+ccflags-y += -Wno-declaration-after-statement
