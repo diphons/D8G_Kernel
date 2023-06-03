@@ -30,6 +30,7 @@
 #include <linux/spi/spi.h>
 #include <linux/regulator/consumer.h>
 #include <linux/mfd/wcd9xxx/wcd9xxx_registers.h>
+#include <misc/d8g_helper.h>
 #include <soc/swr-wcd.h>
 #include <sound/pcm.h>
 #include <sound/pcm_params.h>
@@ -10198,6 +10199,11 @@ static ssize_t headphone_gain_store(struct kobject *kobj,
 	if (input_r < -84 || input_r > 20)
 		input_r = 0;
 
+	if (limited) {
+		input_l = 0;
+		input_r = 0;
+	}
+
 	custom_hp_left = input_l;
 	custom_hp_right = input_r;
 
@@ -10231,6 +10237,9 @@ static ssize_t mic_gain_store(struct kobject *kobj,
 	if (input < -10 || input > 20)
 		input = 0;
 
+	if (limited)
+		input = 0;
+
 	snd_soc_write(sound_control_codec_ptr, WCD934X_CDC_TX7_TX_VOL_CTL, input);
 
 	return count;
@@ -10256,6 +10265,9 @@ static ssize_t earpiece_gain_store(struct kobject *kobj,
 	sscanf(buf, "%d", &input);
 
 	if (input < -10 || input > 20)
+		input = 0;
+
+	if (limited)
 		input = 0;
 
 	snd_soc_write(sound_control_codec_ptr, WCD934X_CDC_RX0_RX_VOL_CTL, input);
