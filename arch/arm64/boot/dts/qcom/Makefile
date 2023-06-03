@@ -77,30 +77,12 @@ dtb-$(CONFIG_MACH_XIAOMI_E10) += \
 	beryllium-mp-v2.1.dtb
 
 dtb-$(CONFIG_MACH_XIAOMI_E1S) += \
-	equuleus-p0-v2.dtb \
-	equuleus-p0-v2.1.dtb \
-	equuleus-p1-v2.dtb \
-	equuleus-p1-v2.1.dtb \
-	equuleus-mp-v2.dtb \
 	equuleus-mp-v2.1.dtb
 
 dtb-$(CONFIG_MACH_XIAOMI_E8) += \
-	ursa-p0-v2.dtb \
-	ursa-p0-v2.1.dtb \
-	ursa-p1-v2.dtb \
-	ursa-p1-v2.1.dtb \
-	ursa-p2-v2.dtb \
-	ursa-p2-v2.1.dtb \
-	ursa-mp-v2.dtb \
 	ursa-mp-v2.1.dtb
 
 dtb-$(CONFIG_MACH_XIAOMI_E5) += \
-	perseus-p0-v2.dtb \
-	perseus-p0-v2.1.dtb \
-	perseus-p1-v2.1.dtb \
-	perseus-p1_2-v2.1.dtb \
-	perseus-p2-v2.1.dtb \
-	perseus-p3-v2.1.dtb \
 	perseus-mp-v2.1.dtb
 endif
 else

@@ -17,6 +17,7 @@
 #include <linux/input.h>
 #include <linux/slab.h>
 #include <linux/msm_drm_notify.h>
+#include <misc/d8g_helper.h>
 
 struct df_boost_drv {
 	struct boost_dev devices[DEVFREQ_MAX];
@@ -389,13 +390,12 @@ static int __init devfreq_boost_init(void)
 
 	d->devices[DEVFREQ_MSM_CPUBW].boost_freq = 50;
 
-	if(!boost_gpu)
+	if(oprofile != 4 && oprofile != 0) {
 		d->devices[DEVFREQ_MSM_CPUBW].boost_freq =
 				CONFIG_DEVFREQ_MSM_CPUBW_BOOST_FREQ;
-
-	if(!boost_gpu)
 		d->devices[DEVFREQ_MSM_LLCCBW].boost_freq =
 				CONFIG_DEVFREQ_MSM_LLCCBW_BOOST_FREQ;
+	}
 
 	devfreq_boost_input_handler.private = d;
 	ret = input_register_handler(&devfreq_boost_input_handler);

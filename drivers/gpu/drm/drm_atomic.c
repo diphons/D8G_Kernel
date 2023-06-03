@@ -33,6 +33,7 @@
 #include <linux/sync_file.h>
 #include <linux/cpu_input_boost.h>
 #include <linux/devfreq_boost.h>
+#include <misc/d8g_helper.h>
 
 #include "drm_crtc_internal.h"
 
@@ -1906,12 +1907,12 @@ int drm_mode_atomic_ioctl(struct drm_device *dev,
 			(arg->flags & DRM_MODE_PAGE_FLIP_EVENT))
 		return -EINVAL;
 
-	if(!boost_gpu)
-		if (!(arg->flags & DRM_MODE_ATOMIC_TEST_ONLY)) {
+	if (!(arg->flags & DRM_MODE_ATOMIC_TEST_ONLY) && (oprofile != 4 || oprofile != 0)) {
+		if (oprofile != 3)
 			cpu_input_boost_kick();
-			devfreq_boost_kick(DEVFREQ_MSM_CPUBW);
-			devfreq_boost_kick(DEVFREQ_MSM_LLCCBW);
-		}
+		devfreq_boost_kick(DEVFREQ_MSM_CPUBW);
+		devfreq_boost_kick(DEVFREQ_MSM_LLCCBW);
+	}
 
 	drm_modeset_acquire_init(&ctx, 0);
 
