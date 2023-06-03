@@ -481,9 +481,7 @@
 	};
 
 	chosen {
-
-		bootargs = "quiet rcupdate.rcu_expedited=1 noirqdebug cgroup.memory=nokmem,nosocket";
-
+		bootargs = "rcupdate.rcu_expedited=1 noirqdebug rcu_nocbs=0-7";
 	};
 
 	soc: soc { };
@@ -500,7 +498,7 @@
 			compatible = "android,firmware";
 			vbmeta {
 				compatible = "android,vbmeta";
-				parts = "vbmeta,boot,system,system_ext,vendor,dtbo";
+				parts = "vbmeta,boot,system,vendor,dtbo";
 			};
 
 			fstab {
@@ -510,7 +508,7 @@
 					dev = "/dev/block/platform/soc/1d84000.ufshc/by-name/vendor";
 					type = "ext4";
 					mnt_flags = "ro,barrier=1,discard";
-					fsmgr_flags = "wait,slotselect,avb";
+					fsmgr_flags = "wait,slotselect";
 					status = "ok";
 				};
 			};
@@ -1482,7 +1480,7 @@
 
 		/* PM QoS */
 		qcom,pm-qos-cpu-groups = <0x0f 0xf0>;
-		qcom,pm-qos-cpu-group-latency-us = <100 100>;
+		qcom,pm-qos-cpu-group-latency-us = <44 44>;
 		qcom,pm-qos-default-cpu = <0>;
 
 		pinctrl-names = "dev-reset-assert", "dev-reset-deassert";
@@ -1552,9 +1550,9 @@
 
 		/* PM QoS */
 		qcom,pm-qos-irq-type = "affine_irq";
-		qcom,pm-qos-irq-latency = <70 70>;
+		qcom,pm-qos-irq-latency = <44 44>;
 		qcom,pm-qos-cpu-groups = <0x3f 0xc0>;
-		qcom,pm-qos-legacy-latency-us = <70 70>, <70 70>;
+		qcom,pm-qos-legacy-latency-us = <44 44>, <44 44>;
 
 		status = "disabled";
 	};

@@ -28,6 +28,7 @@
 #include <drm/drm_crtc.h>
 #include <drm/drm_crtc_helper.h>
 #include <drm/drm_flip_work.h>
+#include <misc/d8g_helper.h>
 
 #include "sde_kms.h"
 #include "sde_hw_lm.h"
@@ -3933,10 +3934,10 @@ void sde_crtc_commit_kickoff(struct drm_crtc *crtc,
 
 	SDE_ATRACE_BEGIN("crtc_commit");
 
-	if(!boost_gpu)
+	if (oprofile != 4 || oprofile != 0) {
 		cpu_input_boost_kick();
-	if(!boost_gpu)
 		devfreq_boost_kick(DEVFREQ_MSM_CPUBW);
+	}
 
 	is_error = _sde_crtc_prepare_for_kickoff_rot(dev, crtc);
 

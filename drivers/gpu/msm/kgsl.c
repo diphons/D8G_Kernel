@@ -32,6 +32,7 @@
 #include <linux/ctype.h>
 #include <linux/mm.h>
 #include <linux/devfreq_boost.h>
+#include <misc/d8g_helper.h>
 #include <asm/cacheflush.h>
 
 #include "kgsl.h"
@@ -4961,7 +4962,7 @@ static int __init kgsl_core_init(void)
 
 	INIT_LIST_HEAD(&kgsl_driver.pagetable_list);
 
-	if (!boost_gpu) {
+	if (oprofile != 4) {
 		kgsl_driver.workqueue = alloc_workqueue("kgsl-workqueue",
 			WQ_HIGHPRI | WQ_UNBOUND | WQ_MEM_RECLAIM | WQ_SYSFS, 0);
 	} else {

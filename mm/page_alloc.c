@@ -68,6 +68,7 @@
 #include <linux/psi.h>
 #include <linux/cpu_input_boost.h>
 #include <linux/devfreq_boost.h>
+#include <misc/d8g_helper.h>
 
 #include <asm/sections.h>
 #include <asm/tlbflush.h>
@@ -3860,12 +3861,21 @@ retry:
 		goto nopage;
 
 	/* Boost when memory is low so allocation latency doesn't get too bad */
-	if (!boost_gpu)
-		cpu_input_boost_kick_max(100);
-	if (!boost_gpu)
-		devfreq_boost_kick_max(DEVFREQ_MSM_CPUBW, 100);
-	if (!boost_gpu)
-		devfreq_boost_kick_max(DEVFREQ_MSM_LLCCBW, 100);
+	if (oprofile !=4 && !limited) {
+		if (oprofile == 0) {
+			cpu_input_boost_kick_max(100);
+			devfreq_boost_kick_max(DEVFREQ_MSM_CPUBW, 100);
+			devfreq_boost_kick_max(DEVFREQ_MSM_LLCCBW, 100);
+		} else if (oprofile == 2) {
+			cpu_input_boost_kick_max(250);
+			devfreq_boost_kick_max(DEVFREQ_MSM_CPUBW, 250);
+			devfreq_boost_kick_max(DEVFREQ_MSM_LLCCBW, 250);
+		} else {
+			cpu_input_boost_kick_max(500);
+			devfreq_boost_kick_max(DEVFREQ_MSM_CPUBW, 500);
+			devfreq_boost_kick_max(DEVFREQ_MSM_LLCCBW, 500);
+		}
+	}
 
 	if (should_reclaim_retry(gfp_mask, order, ac, alloc_flags,
 				 did_some_progress > 0, &no_progress_loops))

@@ -100,7 +100,8 @@ fw-shipped-$(CONFIG_TOUCHSCREEN_ST_FTS) += st_fts_e1_old.ftb
 fw-shipped-$(CONFIG_INPUT_PRESS_NDT_F60) += ndt_fw.bin
 fw-shipped-$(CONFIG_INPUT_PRESS_NDT_M65) += ndt_fw_m65.bin
 fw-shipped-$(CONFIG_TOUCHSCREEN_NT36xxx) += novatek_nt36672_e10.fw novatek_nt36672_e10_hw01.fw \
-						novatek_nt36672_e10_hw02.fw
+						novatek_nt36672_e10_hw02.fw novatek_nt36672_e10n_hw01.fw \
+						novatek_nt36672_e10n_hw02.fw
 fw-shipped-$(CONFIG_TIGON3) += tigon/tg3.bin tigon/tg3_tso.bin \
 			       tigon/tg3_tso5.bin
 fw-shipped-$(CONFIG_TYPHOON) += 3com/typhoon.bin
@@ -185,7 +186,8 @@ quiet_cmd_fwbin = MK_FW   $@
 wordsize_deps := $(wildcard include/config/64bit.h include/config/32bit.h \
 		include/config/ppc32.h include/config/ppc64.h \
 		include/config/superh32.h include/config/superh64.h \
-		include/config/x86_32.h include/config/x86_64.h)
+		include/config/x86_32.h include/config/x86_64.h \
+		firmware/Makefile)
 
 $(patsubst %,$(obj)/%.gen.S, $(fw-shipped-y)): %: $(wordsize_deps)
 	$(call cmd,fwbin,$(patsubst %.gen.S,%,$@))
