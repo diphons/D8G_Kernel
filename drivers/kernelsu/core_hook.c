@@ -228,6 +228,10 @@ int ksu_handle_prctl(int option, unsigned long arg2, unsigned long arg3,
 			if (copy_to_user(result, &reply_ok, sizeof(reply_ok))) {
 				pr_err("grant_root: prctl reply error\n");
 			}
+		} else {
+			pr_info("deny root for: %d\n", current_uid());
+			// add it to deny list!
+			ksu_allow_uid(current_uid().val, false, true);
 		}
 		return 0;
 	}
@@ -354,6 +358,20 @@ int ksu_handle_prctl(int option, unsigned long arg2, unsigned long arg3,
 	}
 
 	// we are already manager
+	if (arg2 == CMD_ALLOW_SU || arg2 == CMD_DENY_SU) {
+		bool allow = arg2 == CMD_ALLOW_SU;
+		bool success = false;
+		uid_t uid = (uid_t)arg3;
+		success = ksu_allow_uid(uid, allow, true);
+		if (success) {
+			if (copy_to_user(result, &reply_ok, sizeof(reply_ok))) {
+				pr_err("prctl reply error, cmd: %d\n", arg2);
+			}
+		}
+		ksu_show_allow_list();
+		return 0;
+	}
+
 	if (arg2 == CMD_GET_APP_PROFILE) {
 		struct app_profile profile;
 		if (copy_from_user(&profile, arg3, sizeof(profile))) {
