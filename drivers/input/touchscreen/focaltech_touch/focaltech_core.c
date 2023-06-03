@@ -45,6 +45,7 @@
 #ifdef CONFIG_TOUCHSCREEN_XIAOMI_TOUCHFEATURE
 #include "../xiaomi/xiaomi_touch.h"
 #endif
+#include <linux/cpu.h>
 
 /*****************************************************************************
 * Private constant and macro definitions using #define
@@ -74,6 +75,8 @@
 #define INPUT_EVENT_PALM_OFF		12
 #define INPUT_EVENT_PALM_ON		13
 #define INPUT_EVENT_END				13
+
+#define SUPER_RESOLUTION_FACOTR             8
 
 /*****************************************************************************
 * Global variable or extern global variabls/functions
@@ -844,6 +847,7 @@ static __always_inline int fts_read_touchdata(struct fts_ts_data *data)
 	int max_touch_num = data->pdata->max_touch_number;
 	u8 *buf = data->point_buf;
 	struct i2c_client *client = data->client;
+	struct sched_param param = { .sched_priority = MAX_USER_RT_PRIO / 2 };
 
 #if FTS_GESTURE_EN
 	if (0 == fts_gesture_readdata(data)) {
@@ -859,6 +863,8 @@ static __always_inline int fts_read_touchdata(struct fts_ts_data *data)
 	if (data->palm_sensor_switch)
 		fts_read_palm_data();
 #endif
+
+	sched_setscheduler(current, SCHED_FIFO, &param);
 
 	data->point_num = 0;
 	data->touch_point = 0;
@@ -990,7 +996,7 @@ static int fts_irq_registration(struct fts_ts_data *ts_data)
 		pdata->irq_gpio_flags = IRQF_TRIGGER_FALLING;
 	FTS_INFO("irq flag:%x", pdata->irq_gpio_flags);
 	ret =
-	    request_threaded_irq(ts_data->irq, NULL, fts_ts_interrupt, pdata->irq_gpio_flags | IRQF_ONESHOT,
+	    request_threaded_irq(ts_data->irq, NULL, fts_ts_interrupt, pdata->irq_gpio_flags | IRQF_ONESHOT | IRQF_PERF_CRITICAL,
 				 ts_data->client->name, ts_data);
 
 	return ret;
@@ -1512,6 +1518,13 @@ static int fts_reset_mode(int mode)
 
 	return 0;
 }
+
+static int fts_get_touch_super_resolution_factor(void)
+{
+	FTS_INFO("current super resolution factor is: %d", SUPER_RESOLUTION_FACOTR);
+	return SUPER_RESOLUTION_FACOTR;
+}
+
 #endif
 #endif
 
@@ -1904,10 +1917,14 @@ static int fb_notifier_callback(struct notifier_block *self, unsigned long event
 		blank = evdata->data;
 		flush_workqueue(fts_data->event_wq);
 
-		if (*blank == DRM_BLANK_UNBLANK)
+		if (*blank == DRM_BLANK_UNBLANK){
+			irq_set_affinity(fts_data->irq, cpu_perf_mask);
 			queue_work(fts_data->event_wq, &fts_data->resume_work);
-		else if (*blank == DRM_BLANK_POWERDOWN)
+		}
+		else if (*blank == DRM_BLANK_POWERDOWN){
+			irq_set_affinity(fts_data->irq, cpumask_of(0));
 			queue_work(fts_data->event_wq, &fts_data->suspend_work);
+		}
 	}
 
 	return 0;
@@ -2187,6 +2204,8 @@ static int fts_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
 		FTS_ERROR("request irq failed");
 		goto err_event_wq;
 	}
+	else
+		irq_set_affinity(fts_data->irq, cpu_perf_mask);
 #if FTS_AUTO_UPGRADE_EN
 	ret = fts_fwupg_init(ts_data);
 	if (ret) {
@@ -2222,6 +2241,7 @@ static int fts_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
 	xiaomi_touch_interfaces.setModeValue = fts_set_cur_value;
 	xiaomi_touch_interfaces.resetMode = fts_reset_mode;
 	xiaomi_touch_interfaces.getModeAll = fts_get_mode_all;
+	xiaomi_touch_interfaces.get_touch_super_resolution_factor = fts_get_touch_super_resolution_factor;
 	fts_init_touchmode_data();
 #endif
 #ifdef CONFIG_TOUCHSCREEN_XIAOMI_TOUCHFEATURE_SENSOR

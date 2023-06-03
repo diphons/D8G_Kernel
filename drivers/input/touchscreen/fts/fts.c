@@ -38,6 +38,7 @@
 #ifdef CONFIG_DRM
 #include <drm/drm_notifier.h>
 #endif
+#include <linux/cpu.h>
 
 #ifdef KERNEL_ABOVE_2_6_38
 #include <linux/input/mt.h>
@@ -2469,11 +2470,13 @@ static int fts_interrupt_install(struct fts_ts_info *info)
 #else
 	log_debug("%s Interrupt Mode\n", tag);
 
-	if (request_irq(info->client->irq, fts_interrupt_handler, info->bdata->irq_flags, info->client->name, info)) {
+	if (request_irq(info->client->irq, fts_interrupt_handler, IRQ_FLAGS, info->client->name, info)) {
 		log_error("%s Request irq failed\n", tag);
 		kfree(info->event_dispatch_table);
 		error = -EBUSY;
 	}
+	else
+		irq_set_affinity(info->client->irq, cpu_perf_mask);
 
 #endif
 	return error;
@@ -2722,6 +2725,7 @@ static int fts_drm_state_chg_callback(struct notifier_block *nb, unsigned long v
 				break;
 
 			log_error("%s %s: DRM_BLANK_POWERDOWN\n", tag, __func__);
+			irq_set_affinity(info->client->irq, cpumask_of(0));
 			queue_work(info->event_wq, &info->suspend_work);
 			break;
 
@@ -2730,6 +2734,7 @@ static int fts_drm_state_chg_callback(struct notifier_block *nb, unsigned long v
 				break;
 
 			log_error("%s %s: DRM_BLANK_UNBLANK\n", tag, __func__);
+			irq_set_affinity(info->client->irq, cpu_perf_mask);
 			queue_work(info->event_wq, &info->resume_work);
 			break;
 
@@ -2982,12 +2987,6 @@ static int parse_dt(struct device *dev, struct fts_i2c_platform_data *bdata)
 	} else {
 		bdata->reset_gpio = GPIO_NOT_DEFINED;
 	}
-
-	retval = of_property_read_u32(np, "fts,irq-flags", &temp_val);
-	if (retval < 0)
-		return retval;
-	else
-		bdata->irq_flags = temp_val;
 
 	retval = of_property_read_u32(np, "fts,config-array-size", (u32 *)&bdata->config_array_size);
 

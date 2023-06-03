@@ -22,7 +22,9 @@
 #include <linux/delay.h>
 #include <linux/i2c.h>
 #include <linux/input.h>
+#include <linux/spi/spi-geni-qcom.h>
 #include <linux/uaccess.h>
+#include <linux/pm_qos.h>
 
 #include "nt36xxx_mem_map.h"
 
@@ -40,7 +42,7 @@
 //---INT trigger mode---
 //#define IRQ_TYPE_EDGE_RISING 1
 //#define IRQ_TYPE_EDGE_FALLING 2
-#define INT_TRIGGER_TYPE IRQ_TYPE_EDGE_RISING
+#define INT_TRIGGER_TYPE (IRQF_TRIGGER_RISING | IRQF_PERF_CRITICAL)
 
 
 //---I2C driver info.---
@@ -103,6 +105,8 @@ struct nvt_config_info {
 	u8 tp_color;
 	u8 tp_hw_version;
 	const char *nvt_cfg_name;
+	const char *nvt_cfg_name_n;
+	const char *nvt_cfg_set;
 	const char *nvt_limit_name;
 #ifdef NVT_TOUCH_COUNT_DUMP
 	const char *clicknum_file_name;
@@ -173,13 +177,18 @@ struct nvt_ts_data {
 	struct workqueue_struct *event_wq;
 	struct completion dev_pm_suspend_completion;
 	struct proc_dir_entry *input_proc;
+	struct pm_qos_request pm_spi_req;
+	struct pm_qos_request pm_touch_req;
 #ifdef NVT_TOUCH_COUNT_DUMP
 	struct class *nvt_tp_class;
 	struct device *nvt_touch_dev;
 	bool dump_click_count;
 	char *current_clicknum_file;
 #endif
-
+	bool palm_sensor_changed;
+	bool palm_sensor_switch;
+	bool gamemode_enabled;
+	struct mutex reg_lock;
 };
 
 #if WAKEUP_GESTURE
@@ -223,6 +232,7 @@ extern int32_t nvt_check_fw_reset_state(RST_COMPLETE_STATE check_reset_state);
 extern int32_t nvt_get_fw_info(void);
 extern int32_t nvt_clear_fw_status(void);
 extern int32_t nvt_check_fw_status(void);
+int32_t nvt_set_pocket_palm_switch(uint8_t pocket_palm_switch);
 extern int32_t nvt_set_page(uint16_t i2c_addr, uint32_t addr);
 extern void nvt_stop_crc_reboot(void);
 extern int32_t nvt_get_lockdown_info(char *lockdata);
