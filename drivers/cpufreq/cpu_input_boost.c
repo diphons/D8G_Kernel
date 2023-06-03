@@ -19,6 +19,7 @@
 #include <linux/input.h>
 #include <linux/moduleparam.h>
 #include <linux/slab.h>
+#include <linux/cpuset.h>
 #include <misc/d8g_helper.h>
 
 static unsigned int input_boost_freq_lp = CONFIG_INPUT_BOOST_FREQ_LP;
@@ -127,6 +128,8 @@ static void __cpu_input_boost_kick_max(struct boost_drv *b,
 {
 	unsigned long curr_expires, new_expires;
 
+	do_hp_cpuset();
+
 	do {
 		curr_expires = atomic64_read(&b->max_boost_expires);
 		new_expires = jiffies + msecs_to_jiffies(duration_ms);
@@ -214,6 +217,8 @@ static void max_unboost_worker(struct work_struct *work)
 {
 	struct boost_drv *b =
 		container_of(to_delayed_work(work), typeof(*b), max_unboost);
+
+	do_lp_cpuset();
 
 	clear_boost_bit(b, WAKE_BOOST | MAX_BOOST);
 
@@ -329,6 +334,8 @@ free_handle:
 
 static void cpu_input_boost_input_disconnect(struct input_handle *handle)
 {
+	do_lp_cpuset();
+
 #ifdef CONFIG_DYNAMIC_STUNE_BOOST
 	if (stune_boost_active) {
 		reset_stune_boost("top-app", boost_slot);
