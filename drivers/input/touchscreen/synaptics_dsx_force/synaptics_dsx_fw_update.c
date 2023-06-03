@@ -2195,7 +2195,7 @@ static int fwu_read_f34_queries(void)
 {
 	int retval;
 	struct synaptics_rmi4_data *rmi4_data = fwu->rmi4_data;
-	u8 *tp_maker;
+	//u8 *tp_maker;
 
 	memset(&fwu->blkcount, 0x00, sizeof(fwu->blkcount));
 	memset(&fwu->phyaddr, 0x00, sizeof(fwu->phyaddr));

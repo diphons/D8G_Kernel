@@ -2376,7 +2376,7 @@ static const char *mxt_get_config(struct mxt_data *data, bool is_default)
 	}
 
 	for (i = 0; i < pdata->config_array_size; i++) {
-		if (data->info.family_id== pdata->config_array[i].family_id &&
+		if (data->info.family_id == pdata->config_array[i].family_id &&
 			data->info.variant_id == pdata->config_array[i].variant_id &&
 			data->info.version == pdata->config_array[i].version &&
 			data->info.build == pdata->config_array[i].build &&
@@ -2547,6 +2547,7 @@ static int mxt_check_reg_init(struct mxt_data *data)
 	int ret = 0;
 	const char *config_name = NULL;
 	bool is_recheck = false, use_default_cfg = false;
+	u8 *tp_maker = NULL;
 
 	if (data->firmware_updated)
 		use_default_cfg = true;
@@ -2621,7 +2622,11 @@ start:
 		}
 	}
 
-	update_hardware_info(TYPE_TP_MAKER, data->panel_id - 0x31);
+
+	tp_maker = kzalloc(20, GFP_KERNEL);
+	if (tp_maker == NULL)
+		dev_err(dev, "fail to alloc vendor name memory\n");
+
 	config_name = mxt_get_config(data, use_default_cfg);
 
 	if (data->config_info[0] >= 0x65) {
