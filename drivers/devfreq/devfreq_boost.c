@@ -54,11 +54,21 @@ static void __devfreq_boost_kick_max(struct boost_dev *b,
 	unsigned int duration_ms)
 {
 	unsigned long flags, new_expires;
+	unsigned int period = duration_ms;
 
 	spin_lock_irqsave(&b->lock, flags);
 	if (!b->df || b->disable) {
 		spin_unlock_irqrestore(&b->lock, flags);
 		return;
+	}
+
+	switch (oprofile) {
+	case 1:
+		period = duration_ms * 2;
+		break;
+	case 3:
+		period = duration_ms * 2;
+		break;
 	}
 
 	new_expires = jiffies + b->max_boost_jiffies;
@@ -67,7 +77,7 @@ static void __devfreq_boost_kick_max(struct boost_dev *b,
 		return;
 	}
 	b->max_boost_expires = new_expires;
-	b->max_boost_jiffies = msecs_to_jiffies(duration_ms);
+	b->max_boost_jiffies = msecs_to_jiffies(period);
 	spin_unlock_irqrestore(&b->lock, flags);
 
 	queue_work(b->wq, &b->max_boost);
