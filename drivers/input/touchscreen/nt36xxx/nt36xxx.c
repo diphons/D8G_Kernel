@@ -1764,12 +1764,15 @@ static DEVICE_ATTR(panel_color, (S_IRUGO), nvt_panel_color_show, NULL);
 static DEVICE_ATTR(panel_display, (S_IRUGO), nvt_panel_display_show, NULL);
 static DEVICE_ATTR(gesture_enable, S_IWUSR | S_IRUSR,
 		nvt_panel_gesture_enable_show, nvt_panel_gesture_enable_store);
+static DEVICE_ATTR(double_tap_enable, S_IWUSR | S_IRUSR,
+		nvt_panel_gesture_enable_show, nvt_panel_gesture_enable_store);
 
 static struct attribute *nvt_attr_group[] = {
 	&dev_attr_panel_vendor.attr,
 	&dev_attr_panel_color.attr,
 	&dev_attr_panel_display.attr,
 	&dev_attr_gesture_enable.attr,
+	&dev_attr_double_tap_enable.attr,
 	NULL,
 };
 

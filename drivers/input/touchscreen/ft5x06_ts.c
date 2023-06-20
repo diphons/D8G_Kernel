@@ -646,6 +646,9 @@ static ssize_t ft5x06_gesture_enable_to_set_store(struct device *dev,
 static DEVICE_ATTR(enable, 0664,
 		ft5x06_gesture_enable_to_set_show,
 		ft5x06_gesture_enable_to_set_store);
+static DEVICE_ATTR(double_tap_enable, 0664,
+		ft5x06_gesture_enable_to_set_show,
+		ft5x06_gesture_enable_to_set_store);
 
 static int ft5x06_entry_pocket(struct device *dev)
 {
