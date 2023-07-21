@@ -1,6 +1,10 @@
 #ifndef __KSU_V_KSU
 #define __KSU_V_KSU
 
-#define KSU_GIT_VERSION 737
+// define git commit count form KernelSU
+#define KSU_GIT_VERSION 1000
+
+// major * 10000 + git version + 200 for historical reasons
+#define KSU_VERSION (10200 + KSU_GIT_VERSION)
 
 #endif
