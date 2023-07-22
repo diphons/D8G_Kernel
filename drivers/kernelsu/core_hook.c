@@ -34,6 +34,7 @@
 
 extern int handle_sepolicy(unsigned long arg3, void __user *arg4);
 int vmin_ksu = KERNEL_SU_VERSION;
+module_param(vmin_ksu, int, 0444);
 int __read_mostly ksu_version = 0;
 module_param(ksu_version, int, 0644);
 
