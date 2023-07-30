@@ -36,6 +36,9 @@
 
 #define MAXIMUM_LINKS_PER_SESSION  4
 
+#define VERSION_1  1
+#define VERSION_2  2
+
 /**
  * enum crm_workq_task_type
  * @codes: to identify which type of task is present
@@ -346,6 +349,7 @@ struct cam_req_mgr_core_link {
 	bool                                 frame_skip_flag;
 	bool                                 sync_link_sof_skip;
 	int64_t                              sync_trigger_frame_id;
+        uint32_t                             last_flush_id;
 	int32_t                              open_req_cnt;
 	int32_t                              num_sof_src;
 	struct cam_req_mgr_dev_sof_evt       dev_sof_evt[3];
@@ -418,7 +422,8 @@ int cam_req_mgr_destroy_session(struct cam_req_mgr_session_info *ses_info);
  * a unique link handle for the link and is specific to a
  * session. Returns link handle
  */
-int cam_req_mgr_link(struct cam_req_mgr_link_info *link_info);
+int cam_req_mgr_link(struct cam_req_mgr_ver_info *link_info);
+int cam_req_mgr_link_v2(struct cam_req_mgr_ver_info *link_info);
 
 /**
  * cam_req_mgr_unlink()
