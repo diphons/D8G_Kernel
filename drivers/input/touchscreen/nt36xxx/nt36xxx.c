@@ -2299,6 +2299,11 @@ static int32_t nvt_ts_suspend(struct device *dev)
 	buf[1] = 0x11;
 	CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 2);
 
+	nvt_set_page(I2C_BLDR_Address, 0x11a50);
+	buf[0] = 0x11a50 & 0xff;
+	buf[1] = 0x11;
+	CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 2);
+
 	if (ts->ts_pinctrl) {
 		ret = pinctrl_select_state(ts->ts_pinctrl,
 			ts->pinctrl_state_suspend);
