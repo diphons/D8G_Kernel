@@ -3977,7 +3977,7 @@ void sde_crtc_commit_kickoff(struct drm_crtc *crtc,
 
 	SDE_ATRACE_BEGIN("crtc_commit");
 
-	if (oprofile != 4 || oprofile != 0) {
+	if (oprofile != 4 && oprofile != 0) {
 		cpu_input_boost_kick();
 		devfreq_boost_kick(DEVFREQ_MSM_CPUBW);
 	}

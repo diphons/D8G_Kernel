@@ -17,10 +17,13 @@
 #include <linux/shmem_fs.h>
 #include <linux/mm_inline.h>
 #include <linux/ctype.h>
+#include <linux/cpu_input_boost.h>
+#include <linux/devfreq_boost.h>
 
 #include <asm/elf.h>
 #include <asm/uaccess.h>
 #include <asm/tlbflush.h>
+#include <misc/d8g_helper.h>
 #include "internal.h"
 
 void task_mem(struct seq_file *m, struct mm_struct *mm)
@@ -228,6 +231,11 @@ static void *m_start(struct seq_file *m, loff_t *ppos)
 	sched_migrate_to_cpumask_start(to_cpumask(&priv->old_cpus_allowed),
 				       cpu_perf_mask);
 
+	if (oprofile !=4 && oprofile !=0) {
+		cpu_input_boost_kick_max(100);
+		devfreq_boost_kick_max(DEVFREQ_MSM_CPUBW, 100);
+		devfreq_boost_kick_max(DEVFREQ_MSM_LLCCBW, 100);
+	}
 
 	down_read(&mm->mmap_sem);
 	hold_task_mempolicy(priv);
