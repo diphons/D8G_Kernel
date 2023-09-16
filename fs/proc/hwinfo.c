@@ -254,7 +254,7 @@ static const struct file_operations hwinfo_proc_fops = {
 static int cpumaxfreq_show(struct seq_file *m, void *v)
 {
 	/* E1 with one big core will use SDM845 with maxfreq */
-	seq_printf(m, "2.9\n");
+	seq_printf(m, "2.8\n");
 
 	return 0;
 }
