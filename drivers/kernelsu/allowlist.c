@@ -44,8 +44,6 @@ static void init_default_profiles()
 
 struct perm_data {
 	struct list_head list;
-	uid_t uid;
-	bool allow;
 	struct app_profile profile;
 };
 
@@ -103,42 +101,6 @@ bool ksu_get_app_profile(struct app_profile *profile, bool query_by_uid)
 
 exit:
 	return found;
-}
-
-bool ksu_allow_uid(uid_t uid, bool allow, bool persist)
-{
-	// find the node first!
-	struct perm_data *p = NULL;
-	struct list_head *pos = NULL;
-	bool result = false;
-	list_for_each (pos, &allow_list) {
-		p = list_entry(pos, struct perm_data, list);
-		if (uid == p->uid) {
-			p->allow = allow;
-			result = true;
-			goto exit;
-		}
-	}
-	
-	// not found, alloc a new node!
-	p = (struct perm_data *)kmalloc(sizeof(struct perm_data), GFP_KERNEL);
-	if (!p) {
-		pr_err("alloc allow node failed.\n");
-		return false;
-	}
-	p->uid = uid;
-	p->allow = allow;
-
-	pr_info("allow_uid: %d, allow: %d", uid, allow);
-
-	list_add_tail(&p->list, &allow_list);
-	result = true;
-
-exit:
-	if (persist)
-		persistent_allow_list();
-
-	return result;
 }
 
 bool ksu_set_app_profile(struct app_profile *profile, bool persist)
@@ -210,9 +172,7 @@ bool ksu_is_allow_uid(uid_t uid)
 	list_for_each (pos, &allow_list) {
 		p = list_entry(pos, struct perm_data, list);
 		// pr_info("is_allow_uid uid :%d, allow: %d\n", p->uid, p->allow);
-		if (uid == p->uid) {
-			return p->allow;
-		} else if (uid == p->profile.current_uid) {
+		if (uid == p->profile.current_uid) {
 			return p->profile.allow_su;
 		}
 	}
@@ -249,9 +209,7 @@ bool ksu_get_allow_list(int *array, int *length, bool allow)
 	list_for_each (pos, &allow_list) {
 		p = list_entry(pos, struct perm_data, list);
 		// pr_info("get_allow_list uid: %d allow: %d\n", p->uid, p->allow);
-		if (p->allow == allow) {
-			array[i++] = p->uid;
-		} else if (p->profile.allow_su == allow) {
+		if (p->profile.allow_su == allow) {
 			array[i++] = p->profile.current_uid;
 		}
 	}
@@ -320,18 +278,7 @@ void do_load_allow_list(struct work_struct *work)
 	fp = filp_open(KERNEL_SU_ALLOWLIST, O_RDONLY, 0);
 
 	if (IS_ERR(fp)) {
-#ifdef CONFIG_KSU_DEBUG
-		int errno = PTR_ERR(fp);
-		if (errno == -ENOENT) {
-			ksu_allow_uid(2000, true,
-				      true); // allow adb shell by default
-		} else {
-			pr_err("load_allow_list open file failed: %ld\n",
-			       PTR_ERR(fp));
-		}
-#else
 		pr_err("load_allow_list open file failed: %ld\n", PTR_ERR(fp));
-#endif
 		return;
 	}
 
@@ -352,15 +299,7 @@ void do_load_allow_list(struct work_struct *work)
 	pr_info("allowlist version: %d\n", version);
 
 	while (true) {
-		u32 uid;
-		bool allow = false;
 		struct app_profile profile;
-
-		ret = ksu_kernel_read_compat(fp, &uid, sizeof(uid), &off);
-		if (ret <= 0) {
-			pr_info("load_allow_list old read err: %zd\n", ret);
-			break;
-		}
 
 		ret = ksu_kernel_read_compat(fp, &profile, sizeof(profile),
 					     &off);
@@ -369,11 +308,7 @@ void do_load_allow_list(struct work_struct *work)
 			pr_info("load_allow_list read err: %zd\n", ret);
 			break;
 		}
-		ret = ksu_kernel_read_compat(fp, &allow, sizeof(allow), &off);
 
-		pr_info("load_allow_uid: %d, allow: %d\n", uid, allow);
-
-		ksu_allow_uid(uid, allow, false);
 		pr_info("load_allow_uid, name: %s, uid: %d, allow: %d\n",
 			profile.key, profile.current_uid, profile.allow_su);
 		ksu_set_app_profile(&profile, false);
@@ -393,11 +328,10 @@ void ksu_prune_allowlist(bool (*is_uid_exist)(uid_t, void *), void *data)
 	// TODO: use RCU!
 	mutex_lock(&allowlist_mutex);
 	list_for_each_entry_safe (np, n, &allow_list, list) {
-		uid_t uidold = np->uid;
 		uid_t uid = np->profile.current_uid;
 		// we use this uid for special cases, don't prune it!
 		bool is_preserved_uid = uid == KSU_APP_PROFILE_PRESERVE_UID;
-		if (!is_preserved_uid && (!is_uid_exist(uid, data) || !is_uid_exist(uidold, data))) {
+		if (!is_preserved_uid && !is_uid_exist(uid, data)) {
 			modified = true;
 			pr_info("prune uid: %d\n", uid);
 			list_del(&np->list);
