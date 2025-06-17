@@ -1,1 +1,44 @@
+name: Build Kernel for Mi 8 (D8G_Kernel)
 
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Compile Kernel
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Kernel Source
+      uses: actions/checkout@v3
+
+    - name: Install Dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y bc bison build-essential curl flex git libncurses5-dev libssl-dev make python3 unzip wget xz-utils zstd
+
+    - name: Download GCC Toolchain
+      run: |
+        mkdir -p toolchain && cd toolchain
+        wget https://releases.linaro.org/components/toolchain/binaries/2021.07/10.3-2021.07/aarch64-linux-gnu/gcc-linaro-10.3.1-2021.07-x86_64_aarch64-linux-gnu.tar.xz
+        tar -xJf gcc-linaro-10.3.1-2021.07-x86_64-aarch64-linux-gnu.tar.xz
+        echo "TOOLCHAIN=$PWD/gcc-linaro-10.3.1-2021.07-x86_64-linux-gnu/bin" >> $GITHUB_ENV
+
+    - name: Compile Kernel
+      run: |
+        export ARCH=arm64
+        export SUBARCH=arm64
+        export CROSS_COMPILE=$TOOLCHAIN/aarch64-linux-gnu-
+
+        make O=out dipper_defconfig
+        make -j$(nproc) O=out
+
+        # Gabungkan Image.gz dan DTB jadi Image.gz-dtb
+        cat out/arch/arm64/boot/Image.gz out/arch/arm64/boot/dts/qcom/*.dtb > out/arch/arm64/boot/Image.gz-dtb
+
+    - name: Upload Image.gz-dtb
+      uses: actions/upload-artifact@v4
+      with:
+        name: Image.gz-dtb
+        path: out/arch/arm64/boot/Image.gz-dtb
+        
