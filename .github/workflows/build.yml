@@ -17,12 +17,13 @@ jobs:
         sudo apt update
         sudo apt install -y bc bison build-essential curl flex git libncurses5-dev libssl-dev make python3 unzip wget xz-utils zstd
 
-    - name: Download GCC Toolchain
+    - name: Download GCC Toolchain (Arter97)
   run: |
     mkdir -p toolchain && cd toolchain
-    wget https://releases.linaro.org/components/toolchain/binaries/10.3-2021.07/aarch64-linux-gnu/gcc-linaro-10.3.1-2021.07-x86_64_aarch64-linux-gnu.tar.xz
-    tar -xf gcc-linaro-10.3.1-2021.07-x86_64_aarch64-linux-gnu.tar.xz
-    echo "TOOLCHAIN=$PWD/gcc-linaro-10.3.1-2021.07-x86_64_aarch64-linux-gnu/bin" >> $GITHUB_ENV
+    wget https://github.com/arter97/arter97-toolchains/releases/download/20230815/arm64-gcc-12.x-20230815.tar.zst
+    tar -I zstd -xf arm64-gcc-12.x-20230815.tar.zst
+    echo "TOOLCHAIN=$PWD/arm64-gcc-12.x-20230815/bin" >> $GITHUB_ENV
+
 
     - name: Compile Kernel
       run: |
