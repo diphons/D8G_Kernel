@@ -18,11 +18,11 @@ jobs:
         sudo apt install -y bc bison build-essential curl flex git libncurses5-dev libssl-dev make python3 unzip wget xz-utils zstd
 
     - name: Download GCC Toolchain
-      run: |
-        mkdir -p toolchain && cd toolchain
-        wget https://releases.linaro.org/components/toolchain/binaries/2021.07/10.3-2021.07/aarch64-linux-gnu/gcc-linaro-10.3.1-2021.07-x86_64_aarch64-linux-gnu.tar.xz
-        tar -xJf gcc-linaro-10.3.1-2021.07-x86_64-aarch64-linux-gnu.tar.xz
-        echo "TOOLCHAIN=$PWD/gcc-linaro-10.3.1-2021.07-x86_64-linux-gnu/bin" >> $GITHUB_ENV
+  run: |
+    mkdir -p toolchain && cd toolchain
+    wget https://releases.linaro.org/components/toolchain/binaries/10.3-2021.07/aarch64-linux-gnu/gcc-linaro-10.3.1-2021.07-x86_64_aarch64-linux-gnu.tar.xz
+    tar -xf gcc-linaro-10.3.1-2021.07-x86_64_aarch64-linux-gnu.tar.xz
+    echo "TOOLCHAIN=$PWD/gcc-linaro-10.3.1-2021.07-x86_64_aarch64-linux-gnu/bin" >> $GITHUB_ENV
 
     - name: Compile Kernel
       run: |
